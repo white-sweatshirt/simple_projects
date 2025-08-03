@@ -70,13 +70,16 @@ char *findFirstOneInString(char *s)
 }
 char complateLenghtOf2To1(char *number1, char *number2)
 {
-
+    // WIP
     if (strlen(number1) > strlen(number2))
     {
-        char *walker2 = number2;
+        char *walker2 = goToEndString(number2); // at place of '\0'
         reverse(number2);
-        while (1)
-            ;
+        int difrence = strlen(number1) - strlen(number2);
+        for (int i = 0; i < difrence+1; i++)//+1 is for '\0'
+            *++walker2 = '0';
+        *walker2 = '\0';
+        reverse(number2);
     }
 }
 // End of functions for conversions to and from binary!
@@ -100,13 +103,13 @@ void binaryAdditionThreeDifrentTables(char *first, char *secund, char *result)
         *walkerResult++ = offset + '0';
     while (first <= walker1)
     {
-        *walkerResult++ = (((*walker1-- - '0') + offset) % 2) + '0';
-        offset = 0;
+        *walkerResult++ = (((*walker1 - '0') + offset) % 2) + '0';
+        offset = ((*walker1-- - '0') + offset >= 2 ? 1 : 0);
     }
     while (secund <= walker2)
     {
-        *walkerResult++ = (((*walker2-- - '0') + offset) % 2) + '0';
-        offset = 0;
+        *walkerResult++ = (((*walker2 - '0') + offset) % 2) + '0';
+        offset = ((*walker2-- - '0') + offset >= 2 ? 1 : 0);
     }
     *walkerResult = '\0';
     reverse(result);
@@ -140,18 +143,22 @@ void binaryAdditionCommonTablesForResoultAndData(char *first, char *unchangedOne
         *walkerResult++ = offset + '0';
     while (first <= walker1)
     {
-        *walkerResult++ = (((*walker1-- - '0') + offset) % 2) + '0';
-        offset = 0;
+        *walkerResult++ = (((*walker1 - '0') + offset) % 2) + '0';
+        offset = ((*walker1-- - '0') + offset >= 2 ? 1 : 0);
     }
     while (unchangedOne <= walkerToUnchanged)
     {
-        *walkerResult++ = (((*walkerToUnchanged-- - '0') + offset) % 2) + '0';
-        offset = 0;
+        *walkerResult++ = (((*walkerToUnchanged - '0') + offset) % 2) + '0';
+        offset = ((*walkerToUnchanged-- - '0') + offset >= 2 ? 1 : 0);
     }
     *walkerResult = '\0';
     reverse(result);
     strcpy(first, result);
-    free(result);
+    for (int i = 0; i < walker1 - first + 1; i++)
+    {
+        char *temp = result++;
+        free(temp);
+    }
 }
 
 void binaryAddition(char *first, char *secund, char *result)
@@ -169,18 +176,21 @@ void binarySubtraction(char *first, char *secund, char *result)
     // Also assumes that first>secund
     char resultOfCompletion[MAX_LENGHT], oneInBinary[] = "1"; // represents one in binary... its to easy to convert
     strcpy(resultOfCompletion, secund);
+
+    complateLenghtOf2To1(first, resultOfCompletion);
     complementNumber(resultOfCompletion); // complements number according to algorithm
 
     binaryAddition(resultOfCompletion, oneInBinary, resultOfCompletion); // adds one binary to complemented value
 
     binaryAddition(first, resultOfCompletion, result); // adds first and prepered CompletentionString
     char *s = findFirstOneInString(result);
-    //  if (*result == '1')
-    //        *result = '0';
-    //  else
-    //      printf("podales liczbe 2>1");
+    if (*result == '1')
+        *result = '0';
+    else
+        printf("podales liczbe 2>1");
     // gives as result string of characters reperesenting subtraction from first secund
 }
+// To Do: Binary Multiplication and division
 void drawNiceLine()
 {
     for (int i = 0; i < 13; i++)
@@ -196,12 +206,13 @@ int main()
     conversionToBinary(number1, a, MAX_LENGHT);
     conversionToBinary(number2, b, MAX_LENGHT);
 
-    printf("%13s\n+%12s\n", number1, number2);
+    printf("%13s\n-%12s\n", number1, number2);
     drawNiceLine();
+
     binarySubtraction(number1, number2, result);
     printf("%13s\n", result);
     converstionToDecimal(result, &c);
     converstionToDecimal(number2, &b);
-    printf("%d + %d = %d\n", a, b, c);
+    printf("%d - %d = %d\n", a, b, c);
     return 0;
 }
