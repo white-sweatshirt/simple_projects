@@ -2,6 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #define MAX_LENGHT 100
+// t - is type of table must be a pointer to its first element
+#define freeMemoryFromTable(t, s, n) \
+    for (int i = 0; i < (n); i++)    \
+    {                                \
+        t temp = (s)++;              \
+        free(temp);                  \
+    }
+
 // Number to Binary
 char *goToEndString(char *s)
 {
@@ -58,15 +66,25 @@ void complementNumber(char *number)
         else
             *number++ = '0';
 }
-char *findFirstOneInString(char *s)
+void fillWithZeros(char *number, int max)
 {
+    // I need to fill it all ummm
+    for (int i = 0; i < max - 1; i++)
+        *number++ = '0';
+    *++number = '\0';
+}
+char *findFirstOneFromEnd(char *beggingOfstring, char *endOfString)
+{
+
+    char *walker = endOfString;
     // Assumes that string s is filled with zeros and ones
-    while (*s != '\0' && *s != '1')
-        *s++;
-    if (!s)
+    // Assumes that string s is at end of it that is it is in position before ending :'\0'
+    while (beggingOfstring < walker && *walker != '1')
+        walker--;
+    if (beggingOfstring == walker && *beggingOfstring != '1')
         return NULL;
     else
-        return s;
+        return walker;
 }
 char complateLenghtOf2To1(char *number1, char *number2)
 {
@@ -76,7 +94,7 @@ char complateLenghtOf2To1(char *number1, char *number2)
         char *walker2 = goToEndString(number2); // at place of '\0'
         reverse(number2);
         int difrence = strlen(number1) - strlen(number2);
-        for (int i = 0; i < difrence+1; i++)//+1 is for '\0'
+        for (int i = 0; i < difrence + 1; i++) //+1 is for '\0'
             *++walker2 = '0';
         *walker2 = '\0';
         reverse(number2);
@@ -125,7 +143,7 @@ void binaryAdditionCommonTablesForResoultAndData(char *first, char *unchangedOne
 
     char *walkerToUnchanged = unchangedOne;
     walker1 = goToEndString(first);
-    result = calloc(walker1 - first + 1, sizeof(char));
+    result = (char *)calloc(MAX_LENGHT, sizeof(char)); // place for end '\0' and for 1 addtion potentialy
     char *walkerResult = result;
 
     if (!result)
@@ -154,11 +172,7 @@ void binaryAdditionCommonTablesForResoultAndData(char *first, char *unchangedOne
     *walkerResult = '\0';
     reverse(result);
     strcpy(first, result);
-    for (int i = 0; i < walker1 - first + 1; i++)
-    {
-        char *temp = result++;
-        free(temp);
-    }
+    freeMemoryFromTable(char *, result, MAX_LENGHT);
 }
 
 void binaryAddition(char *first, char *secund, char *result)
@@ -183,14 +197,35 @@ void binarySubtraction(char *first, char *secund, char *result)
     binaryAddition(resultOfCompletion, oneInBinary, resultOfCompletion); // adds one binary to complemented value
 
     binaryAddition(first, resultOfCompletion, result); // adds first and prepered CompletentionString
-    char *s = findFirstOneInString(result);
     if (*result == '1')
         *result = '0';
     else
         printf("podales liczbe 2>1");
     // gives as result string of characters reperesenting subtraction from first secund
 }
-// To Do: Binary Multiplication and division
+void binaryAddtionToPartOfSecund(char *first, char *secund, char *result, char *endOfPartOfSecund)
+{
+    // 1.Assumes that secund is pointer to binary number
+    // In form of string of charcters ended with '\0'
+    // 2.Assumes that endOfPartOfSecund is a pointer to last number from right(from secund)
+    // to with we should add numbers from first number(pointed by pointer first)
+    // 3. Assumes that result is string filled with zeors and that it is ended with '\0'
+    char *end2 = goToEndString(secund);
+    char *tableHelp = (char *)calloc(MAX_LENGHT, sizeof(char));
+}
+// To Do: Binary Division and Multiplication
+void binaryMultiplication(char *first, char *secund, char *result, int max)
+{
+    // 1.Assumes that result is emty i.e there is no important information on it
+    // 2.Assumes that first and secund are binary numbers in form of string with ending of '\0'
+    char *walker2 = goToEndString(secund);
+    fillWithZeros(result, max); // takes care of postions ommited because lack need of addtion.
+
+    char *end2 = walker2;
+    while ((walker2 = findFirstOneFromEnd(secund, walker2)) != NULL && secund <= walker2)
+        binaryAddition(first, (result + (end2 - walker2)), (result + (end2 - walker2--)));
+}
+
 void drawNiceLine()
 {
     for (int i = 0; i < 13; i++)
@@ -200,19 +235,19 @@ void drawNiceLine()
 int main()
 {
     char number1[MAX_LENGHT], number2[MAX_LENGHT], result[MAX_LENGHT] = {'\0'};
-    int a = 90;
-    int b = 7, c = 0;
+    int a = 15;
+    int b = 10, c = 0;
 
     conversionToBinary(number1, a, MAX_LENGHT);
     conversionToBinary(number2, b, MAX_LENGHT);
 
-    printf("%13s\n-%12s\n", number1, number2);
+    printf("%13s\n+%12s\n", number1, number2);
     drawNiceLine();
 
-    binarySubtraction(number1, number2, result);
+    binaryAddition(number1, number2, result);
     printf("%13s\n", result);
     converstionToDecimal(result, &c);
     converstionToDecimal(number2, &b);
-    printf("%d - %d = %d\n", a, b, c);
+    printf("%d + %d = %d\n", a, b, c);
     return 0;
 }
