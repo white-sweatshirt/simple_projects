@@ -202,8 +202,15 @@ void binaryAdditionToPartOfSecund(char *first, char *secund, char *result, int n
     reverse(result);
     free(tableForNFirstCharacteres);
 }
+void killUnecesseryZeors(char *s)
+{
+    reverse(s);
+    // 1.Assumes that s is binary number in form of string with ending of '\0'
+    char *endS = goToEndString(s);
+    *(findFirstOneFromEnd(s, endS) + 1) = '\0';
+    reverse(s);
+}
 
-// To Do: Binary Division and Multiplication
 void binaryMultiplication(char *first, char *secund, char *result, int max)
 {
     // 1.Assumes that result is emty i.e there is no important information on it
@@ -216,30 +223,57 @@ void binaryMultiplication(char *first, char *secund, char *result, int max)
         binaryAdditionToPartOfSecund(first, result, result, end2 - walker2);
         walker2--;
     }
+    killUnecesseryZeors(result); // sanetizing output
 }
-
-void drawNiceLine()
+// To Do: Binary Division
+void printNumberNspaceLater(char *number, int n)
 {
-    for (int i = 0; i < 13; i++)
+    // 1.Assumes that first and secund, result are binary numbers in form of string with ending of '\0'
+    // 2. Assumes that secnud is larger repesents value of multiplication of first by secund
+    for (int i = 0; i < n; i++)
+        printf(" ");
+    printf("%s\n", number);
+}
+void drawNiceLine(int n)
+{
+    for (int i = 0; i < n; i++)
         printf("-");
     puts("");
+}
+#define PLACE_FOR_SYMBOL 1
+void visualieMultiplication(char *first, char *secund, char *result)
+{
+    // 1. Assumes that first and secund, result are binary numbers in form of string with ending of '\0'
+    // 2. Assumes that result repesents value of multiplication of first by secund
+    printNumberNspaceLater(first, strlen(result) - strlen(first));
+    printf("*");
+    printNumberNspaceLater(secund, strlen(result) - strlen(secund) - PLACE_FOR_SYMBOL);
+    drawNiceLine(strlen(result));
+    char *walker2, *end2;
+    end2 = walker2 = goToEndString(secund);
+    while ((walker2 = findFirstOneFromEnd(secund, walker2)) != NULL && secund <= walker2)
+    {
+        // Formule - we have max ammount of characters from result, first takes some characters for showing its digits
+        // last part ensures dynamicly changing postion of text.
+        printNumberNspaceLater(first, strlen(result) - strlen(first) - (end2 - walker2));
+        walker2--;
+    }
+    drawNiceLine(strlen(result));
+    printf("%s", result);
 }
 int main()
 {
     char number1[MAX_LENGHT], number2[MAX_LENGHT], result[MAX_LENGHT] = {'\0'};
     int a = 12;
-    int b = 200, c = 0;
+    int b = 50, c = 0;
 
     conversionToBinary(number1, a, MAX_LENGHT);
     conversionToBinary(number2, b, MAX_LENGHT);
 
-    printf("%13s\n*%12s\n", number1, number2);
-    drawNiceLine();
-
     binaryMultiplication(number1, number2, result, MAX_LENGHT);
-    printf("%13s\n", result);
+    visualieMultiplication(number1, number2, result);
     converstionToDecimal(result, &c);
     converstionToDecimal(number2, &b);
-    printf("%d * %d = %d\n", a, b, c);
+    printf("\n%d * %d = %d\n", a, b, c);
     return 0;
 }
