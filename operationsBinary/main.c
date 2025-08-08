@@ -142,55 +142,22 @@ void binaryAdditionThreeDifrentTables(char *first, char *secund, char *result)
     *walkerResult = '\0';
     reverse(result);
 }
-void binaryAdditionCommonTablesForResoultAndData(char *first, char *unchangedOne)
+void binaryAdditionNoResultTable(char *unChanging, char *changingOne)
 {
-    // To do:kill this function
-    //  Assumptions: those pointers are to string of characters
-    //  Ended with '\0'
-    int offset = 0;
-    char *walker1 = first;
-    char *result;
+    // It assumes that both are string of characters of 1 and 0 and that they are finshed with '\0'
+    char *result = (char *)calloc(MAX_LENGHT, sizeof(char));
+    binaryAdditionThreeDifrentTables(unChanging, changingOne, result);
+    strcpy(changingOne, result);
 
-    char *walkerToUnchanged = unchangedOne;
-    walker1 = goToEndString(first);
-    result = (char *)calloc(MAX_LENGHT, sizeof(char)); // place for end '\0' and for 1 addtion potentialy
-    char *walkerResult = result;
-
-    if (!result)
-    {
-        printf("brak pamieci!");
-        exit(1);
-    }
-    walkerToUnchanged = goToEndString(unchangedOne);
-    while (first <= walker1 && unchangedOne <= walkerToUnchanged)
-    {
-        *walkerResult++ = (*walker1 - '0' + *walkerToUnchanged - '0' + offset) % 2 + '0';
-        offset = ((*walker1-- - '0') + (*walkerToUnchanged-- - '0') + offset >= 2) ? 1 : 0;
-    }
-    if (first > walker1 && unchangedOne > walkerToUnchanged && offset > 0)
-        *walkerResult++ = offset + '0';
-    while (first <= walker1)
-    {
-        *walkerResult++ = (((*walker1 - '0') + offset) % 2) + '0';
-        offset = ((*walker1-- - '0') + offset >= 2 ? 1 : 0);
-    }
-    while (unchangedOne <= walkerToUnchanged)
-    {
-        *walkerResult++ = (((*walkerToUnchanged - '0') + offset) % 2) + '0';
-        offset = ((*walkerToUnchanged-- - '0') + offset >= 2 ? 1 : 0);
-    }
-    *walkerResult = '\0';
-    reverse(result);
-    strcpy(first, result);
+    *(changingOne + (goToEndString(result) - result + 1)) = '\0';
     free(result);
 }
-
 void binaryAddition(char *first, char *secund, char *result)
 {
     if (first == result)
-        binaryAdditionCommonTablesForResoultAndData(first, secund);
+        binaryAdditionNoResultTable(secund, first);
     else if (secund == result)
-        binaryAdditionCommonTablesForResoultAndData(secund, first);
+        binaryAdditionNoResultTable(first, secund);
     else
         binaryAdditionThreeDifrentTables(first, secund, result);
 }
@@ -229,9 +196,9 @@ void binaryAdditionToPartOfSecund(char *first, char *secund, char *result, int n
     binaryAddition(first, tableForNFirstCharacteres, tableForNFirstCharacteres);
 
     reverse(result);
-    reverse(tableForNFirstCharacteres);// reversing tables in order to make addition possiablle
+    reverse(tableForNFirstCharacteres); // reversing tables in order to make addition possiablle
 
-    strcpy(result+numberOfCharactersToAdd,tableForNFirstCharacteres);// first n characters are allready good.
+    strcpy(result + numberOfCharactersToAdd, tableForNFirstCharacteres); // first n characters are allready good.
     reverse(result);
     free(tableForNFirstCharacteres);
 }
