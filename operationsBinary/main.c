@@ -3,6 +3,7 @@
 #include <string.h>
 // Amongst of all document there is convention to use (first , secund, result) -
 #define MAX_LENGHT 100
+#define PLACE_FOR_SYMBOL 1
 // t - is type of table must be a pointer to its first element
 #define freeMemoryFromTable(t, s, n) \
     for (int i = 0; i < (n); i++)    \
@@ -98,7 +99,6 @@ char *findFirstOneFromEnd(char *beggingOfstring, char *endOfString)
 }
 char complateLenghtOf2To1(char *number1, char *number2)
 {
-    // WIP
     if (strlen(number1) > strlen(number2))
     {
         char *walker2 = goToEndString(number2); // at place of '\0'
@@ -109,6 +109,25 @@ char complateLenghtOf2To1(char *number1, char *number2)
         *walker2 = '\0';
         reverse(number2);
     }
+}
+int checkIfFirstIsLarger(char *first, char *secund)
+{
+    // Assumptions: those pointers are to string of characters both are binary
+    // Ended with '\0'
+    // it returns positive number if first is greater or equal and zero if ther are equal
+
+    // No reason to compere longer to shorter
+    if (strlen(first) > strlen(secund))
+        return 1;
+    else if (strlen(first) < strlen(secund))
+        return -1;
+    else // case that there is equal lenght.
+        for (int i = 0; *(first + i) != '\0' && *(secund + i) != '\0'; i++)
+            if (*(first + i) > *(secund + i))
+                return 1;
+            else if (*(first + i) < *(secund + i))
+                return -1;
+    return 0;
 }
 // End of functions for conversions to and from binary!
 // i.e  switch zeors with ones
@@ -213,7 +232,7 @@ void killUnecesseryZeors(char *s)
 
 void binaryMultiplication(char *first, char *secund, char *result, int max)
 {
-    // 1.Assumes that result is emty i.e there is no important information on it
+    // 1.Assumes that result is empty i.e there is no important information on it
     // 2.Assumes that first and secund are binary numbers in form of string with ending of '\0'
     char *end2, *walker2;
     end2 = walker2 = goToEndString(secund);
@@ -225,7 +244,32 @@ void binaryMultiplication(char *first, char *secund, char *result, int max)
     }
     killUnecesseryZeors(result); // sanetizing output
 }
-// To Do: Binary Division
+void calculatePartialReminder(char *start, char *divsor, char *reminder, int maxLenght)
+{
+    // 1.Assumes reminder is intilized table i.e it has '\0' at the end
+    // 2.Assumes that start is a pointer to binary numer divded by divsor
+    char *walker = start;
+    while (walker - start + 1 < strlen(divsor) && *walker != '\0')
+        walker++;
+    // 3 is from need to acomdate first one, ending and eventual offset.
+    char *partialReminder = calloc(walker - start + PLACE_FOR_SYMBOL * 3, sizeof(char));
+
+    free(partialReminder);
+}
+void binaryDivsion(char *first, char *secund, char *result, char *reminder, int maxLenght)
+{
+    // 1.Assumes that result,rest are empty i.e there is no important information on it
+    // 2.Assumes that first and secund are binary numbers in form of string with ending of '\0'
+
+    // if checking goes badly then we are set
+    if (checkIfFirstIsLarger(first, secund) < 0)
+    {
+        strcpy(reminder, first);
+        strcpy(result, "0");
+        return;
+    }
+}
+// Visual functions made for printing argmuent on screen
 void printNumberNspaceLater(char *number, int n)
 {
     // 1.Assumes that first and secund, result are binary numbers in form of string with ending of '\0'
@@ -240,7 +284,7 @@ void drawNiceLine(int n)
         printf("-");
     puts("");
 }
-#define PLACE_FOR_SYMBOL 1
+
 void visualieMultiplication(char *first, char *secund, char *result)
 {
     // 1. Assumes that first and secund, result are binary numbers in form of string with ending of '\0'
@@ -253,7 +297,7 @@ void visualieMultiplication(char *first, char *secund, char *result)
     end2 = walker2 = goToEndString(secund);
     while ((walker2 = findFirstOneFromEnd(secund, walker2)) != NULL && secund <= walker2)
     {
-        // Formule - we have max ammount of characters from result, first takes some characters for showing its digits
+        // Formule  - we have max ammount of characters from result, first takes some characters for showing its digits
         // last part ensures dynamicly changing postion of text.
         printNumberNspaceLater(first, strlen(result) - strlen(first) - (end2 - walker2));
         walker2--;
@@ -265,8 +309,14 @@ int main()
 {
     char number1[MAX_LENGHT], number2[MAX_LENGHT], result[MAX_LENGHT] = {'\0'};
     int a = 12;
-    int b = 50, c = 0;
+    int b = 53, c = 0;
 
+    char **fuck = calloc(12, sizeof(char *));
+    *++fuck="kurwa";
+    printf("%s\n",*fuck);
+    --fuck;
+    free(fuck);
+    // dynamic table
     conversionToBinary(number1, a, MAX_LENGHT);
     conversionToBinary(number2, b, MAX_LENGHT);
 
