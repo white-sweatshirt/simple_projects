@@ -114,7 +114,7 @@ int checkIfFirstIsLarger(char *first, char *secund)
 {
     // Assumptions: those pointers are to string of characters both are binary
     // Ended with '\0'
-    // it returns positive number if first is greater or equal and zero if ther are equal
+    // it returns positive number if first is greater or equal and zero if they are equal
 
     // No reason to compere longer to shorter
     if (strlen(first) > strlen(secund))
@@ -128,6 +128,29 @@ int checkIfFirstIsLarger(char *first, char *secund)
             else if (*(first + i) < *(secund + i))
                 return -1;
     return 0;
+}
+char *findFragmentOfFirstLargerOrEqualToSecund(char *first, char *secund)
+{
+    // Assumtions: first and secund are binary numbers represented in table of chars ended with '\0'
+    // Function returns pointer to end of fragmant of first that is larger than secund
+    // If it doesn't exists then pointer is to NULL
+    if (strlen(first) < strlen(secund))
+        return NULL;
+    char *walker1 = first;
+    while (walker1 - first + 1 < strlen(secund) && *walker1 != '\0')
+        walker1++;
+    char *tempTalbe = calloc(walker1 - first + 2, sizeof(char));
+    strncpy(tempTalbe, first, walker1 - first + 1);
+    *(tempTalbe + (walker1 - first) + 1) = '\0';
+    if (checkIfFirstIsLarger(tempTalbe, secund) < 0 && walker1 != '\0')
+        walker1++;
+    else if (checkIfFirstIsLarger(tempTalbe, secund) < 0)
+    {
+        free(tempTalbe);
+        return NULL; // there is no fragment of first that is larger than secund.
+    }
+    free(tempTalbe);
+    return walker1;
 }
 // End of functions for conversions to and from binary!
 // i.e  switch zeors with ones
@@ -244,22 +267,33 @@ void binaryMultiplication(char *first, char *secund, char *result, int max)
     }
     killUnecesseryZeors(result); // sanetizing output
 }
-void calculatePartialReminder(char *start, char *divsor, char *reminder, int maxLenght)
+void calculatePartialReminder(char *start,char*endOfPart ,char *divsor, char *reminder)
 {
     // 1.Assumes reminder is intilized table i.e it has '\0' at the end
     // 2.Assumes that start is a pointer to binary numer divded by divsor
     char *walker = start;
-    while (walker - start + 1 < strlen(divsor) && *walker != '\0')
-        walker++;
-    // 3 is from need to acomdate first one, ending and eventual offset.
-    char *partialReminder = calloc(walker - start + PLACE_FOR_SYMBOL * 3, sizeof(char));
 
+    // 3 is from need to acomdate first one, ending and eventual offset.
+    char *partialReminder = (char *)calloc(walker - start + PLACE_FOR_SYMBOL * 3, sizeof(char));
+    strncpy(partialReminder, start, start - walker + 1);
+    *(partialReminder + (start - walker)) = '\0';
+    if (checkIfFirstIsLarger(partialReminder, divsor) < 0)
+    {
+        *(partialReminder + (start - walker) + 1) = *(start + (start - walker) + 1);
+        *(partialReminder + (start - walker) + 2) = '\0';
+    }
+    binarySubtraction(partialReminder, divsor, reminder);
     free(partialReminder);
 }
-void binaryDivsion(char *first, char *secund, char *result, char *reminder, int maxLenght)
+void binaryDisionCalculateWholes(char *start, char *divsor, char *result)
 {
-    // 1.Assumes that result,rest are empty i.e there is no important information on it
-    // 2.Assumes that first and secund are binary numbers in form of string with ending of '\0'
+
+}
+void binaryDivsion(char *first, char *secund, char *result, char *reminder)
+{
+    // WIP
+    //  1.Assumes that result,rest are empty i.e there is no important information on it
+    //  2.Assumes that first and secund are binary numbers in form of string with ending of '\0'
 
     // if checking goes badly then we are set
     if (checkIfFirstIsLarger(first, secund) < 0)
@@ -312,8 +346,8 @@ int main()
     int b = 53, c = 0;
 
     char **fuck = calloc(12, sizeof(char *));
-    *++fuck="kurwa";
-    printf("%s\n",*fuck);
+    *++fuck = "kurwa";
+    printf("%s\n", *fuck);
     --fuck;
     free(fuck);
     // dynamic table
