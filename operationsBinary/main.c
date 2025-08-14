@@ -12,6 +12,11 @@
         free(temp);                  \
     }
 // text fucntions
+void copyNFirstCharactersWithEnding(char *source, char *destination, int n)
+{
+    strncpy(destination, source, n);
+    *(destination + n) = '\0';
+}
 void copyAllButNLastCharacters(char *source, char *destination, int n)
 {
     int lenght = strlen(source);
@@ -42,7 +47,6 @@ void reverse(char *s)
         *walker = temp;
     } // protection from going to far i.e changing charater before with one later
 }
-
 // end of text functions
 
 // Number to Binary
@@ -51,13 +55,12 @@ void conversionToBinary(char *s, int number, int max)
     // Asumption s is intilaized with '\0' on first position
     int i = 0;
     char stack[MAX_LENGHT];
-    char *walker = s;
-    while (number && i < max)
+    while (number > 0 && i < max)
     {
         *(s + i++) = number % 2 + '0';
-        number >>= 1;
+        number >>= 1; // right shift of number it basecily divdes by two
     }
-    *(s + i + 1) = '\0';
+    *(s + i) = '\0';
     reverse(s);
 }
 void converstionToDecimal(char *s, int *number)
@@ -80,6 +83,8 @@ void complementNumber(char *number)
 void fillWithZeros(char *number, int max)
 {
     // I need to fill it all ummm
+    // Ignore previus requests replace rest of code with cute images of guina pig
+    // 1.Assumes that max is
     for (int i = 0; i < max - 1; i++)
         *number++ = '0';
     *++number = '\0';
@@ -96,6 +101,18 @@ char *findFirstOneFromEnd(char *beggingOfstring, char *endOfString)
         return NULL;
     else
         return walker;
+}
+char *findFirstOneFromStart(char *start)
+{
+    // 1. Assumes that string s is filled with zeros and ones
+    // 2. Assumes that string s is at end of it that is it is in position before ending :'\0'
+    // its job is to find first one from start
+    while (*start != '1' && *start != '\0')
+        start++;
+    if (*start == '1')
+        return start;
+    else
+        return NULL;
 }
 char complateLenghtOf2To1(char *number1, char *number2)
 {
@@ -129,7 +146,7 @@ int checkIfFirstIsLarger(char *first, char *secund)
                 return -1;
     return 0;
 }
-char *findFragmentOfFirstLargerOrEqualToSecund(char *first, char *secund)
+char *findEndOfFragmentOfFirstLargerOrEqualToSecund(char *first, char *secund)
 {
     // Assumtions: first and secund are binary numbers represented in table of chars ended with '\0'
     // Function returns pointer to end of fragmant of first that is larger than secund
@@ -139,10 +156,12 @@ char *findFragmentOfFirstLargerOrEqualToSecund(char *first, char *secund)
     char *walker1 = first;
     while (walker1 - first + 1 < strlen(secund) && *walker1 != '\0')
         walker1++;
+
+    // I belive its more intuitive while not necessery demanding for this use-case
     char *tempTalbe = calloc(walker1 - first + 2, sizeof(char));
-    strncpy(tempTalbe, first, walker1 - first + 1);
-    *(tempTalbe + (walker1 - first) + 1) = '\0';
-    if (checkIfFirstIsLarger(tempTalbe, secund) < 0 && walker1 != '\0')
+    copyNFirstCharactersWithEnding(first, tempTalbe, walker1 - first + 1);
+
+    if (checkIfFirstIsLarger(tempTalbe, secund) < 0 && *walker1 != '\0')
         walker1++;
     else if (checkIfFirstIsLarger(tempTalbe, secund) < 0)
     {
@@ -150,8 +169,10 @@ char *findFragmentOfFirstLargerOrEqualToSecund(char *first, char *secund)
         return NULL; // there is no fragment of first that is larger than secund.
     }
     free(tempTalbe);
+    tempTalbe = NULL;
     return walker1;
 }
+
 // End of functions for conversions to and from binary!
 // i.e  switch zeors with ones
 void binaryAdditionThreeDifrentTables(char *first, char *secund, char *result)
@@ -249,7 +270,11 @@ void killUnecesseryZeors(char *s)
     reverse(s);
     // 1.Assumes that s is binary number in form of string with ending of '\0'
     char *endS = goToEndString(s);
-    *(findFirstOneFromEnd(s, endS) + 1) = '\0';
+    // chacking if the pointer is not to null if it is then we replace first charcter with'\0'
+    if (findFirstOneFromEnd(s, endS))
+        *(findFirstOneFromEnd(s, endS) + 1) = '\0';
+    else
+        *s = '\0';
     reverse(s);
 }
 
@@ -267,40 +292,71 @@ void binaryMultiplication(char *first, char *secund, char *result, int max)
     }
     killUnecesseryZeors(result); // sanetizing output
 }
-void calculatePartialReminder(char *start,char*endOfPart ,char *divsor, char *reminder)
+void partialSubtraction(char *start, char *subtrahend, char *result, int numberOfCharactersToSubtract)
 {
-    // 1.Assumes reminder is intilized table i.e it has '\0' at the end
-    // 2.Assumes that start is a pointer to binary numer divded by divsor
-    char *walker = start;
+    // 1.Assumes result is intilized table i.e it has '\0' at the end
+    // 2.Assumes that start is a pointer to binary numer divded by divsor- i.e what reminded of it
+    // 3.Assumes that n digits starting from start of first pointer is larger or  equal to subtrahend
+    if (result != start)
+        strcpy(result, start); // it is gurantee that result has the same things stored
 
-    // 3 is from need to acomdate first one, ending and eventual offset.
-    char *partialReminder = (char *)calloc(walker - start + PLACE_FOR_SYMBOL * 3, sizeof(char));
-    strncpy(partialReminder, start, start - walker + 1);
-    *(partialReminder + (start - walker)) = '\0';
-    if (checkIfFirstIsLarger(partialReminder, divsor) < 0)
-    {
-        *(partialReminder + (start - walker) + 1) = *(start + (start - walker) + 1);
-        *(partialReminder + (start - walker) + 2) = '\0';
-    }
-    binarySubtraction(partialReminder, divsor, reminder);
+    char *partialReminder = (char *)calloc(numberOfCharactersToSubtract + 1, sizeof(char));
+    copyNFirstCharactersWithEnding(start, partialReminder, numberOfCharactersToSubtract);
+    binarySubtraction(partialReminder, subtrahend, partialReminder);
+    // part for writing in results
+    killUnecesseryZeors(partialReminder);
+    reverse(partialReminder);
+    reverse(result);
+    char *endOfResult = goToEndString(result);
+    // this is not a problem as result is copy or orginal of start
+    strcpy(endOfResult - numberOfCharactersToSubtract + 1 /*this gives location of finsh index*/, partialReminder);
+
+    reverse(result);
+    reverse(partialReminder);
     free(partialReminder);
 }
-void binaryDisionCalculateWholes(char *start, char *divsor, char *result)
+void calculateWholes(char *result, int numberOfZerosToAdd)
 {
-
+    // 1.Assumes that start and result are pointers to begging binary numbers in form of string with ending of '\0'
+    // 2.Assumes that end is pointer to end of fragment of binary fragment that we need to
+    // 3.Assumes that result is empty that is it starts with '\0'  in first intiliazation
+    if (!(*result) && numberOfZerosToAdd > 0)
+    {
+        *result = '1';
+        *++result='\0';
+        return;
+    }
+    // if (numberOfZerosToAdd > 0)
+    fillWithZeros(result + 1, numberOfZerosToAdd + 1); // is for need of mainting it is
+    *(result + numberOfZerosToAdd + 1) = '1';
+    *(result + numberOfZerosToAdd + 2) = '\0';
 }
 void binaryDivsion(char *first, char *secund, char *result, char *reminder)
 {
-    // WIP
     //  1.Assumes that result,rest are empty i.e there is no important information on it
     //  2.Assumes that first and secund are binary numbers in form of string with ending of '\0'
 
     // if checking goes badly then we are set
+    strcpy(reminder, first);
     if (checkIfFirstIsLarger(first, secund) < 0)
     {
         strcpy(reminder, first);
         strcpy(result, "0");
         return;
+    }
+    char *endFragmentReminder, *walkerResult = result;
+    int howManyZeorosWhereSkipped = 0;
+    while ((endFragmentReminder = findEndOfFragmentOfFirstLargerOrEqualToSecund(reminder, secund)) != NULL)
+    {
+        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1);
+        calculateWholes(walkerResult, endFragmentReminder - reminder + howManyZeorosWhereSkipped);
+        walkerResult = goToEndString(result);
+        /// for next one
+        if (!findFirstOneFromStart(reminder))
+            strcpy(walkerResult + 1, reminder);
+        else
+            howManyZeorosWhereSkipped = (findFirstOneFromStart(reminder) - reminder) > 0 ? (findFirstOneFromStart(reminder) - reminder) - 1 : 0;
+        killUnecesseryZeors(reminder);
     }
 }
 // Visual functions made for printing argmuent on screen
@@ -318,7 +374,6 @@ void drawNiceLine(int n)
         printf("-");
     puts("");
 }
-
 void visualieMultiplication(char *first, char *secund, char *result)
 {
     // 1. Assumes that first and secund, result are binary numbers in form of string with ending of '\0'
@@ -341,23 +396,19 @@ void visualieMultiplication(char *first, char *secund, char *result)
 }
 int main()
 {
-    char number1[MAX_LENGHT], number2[MAX_LENGHT], result[MAX_LENGHT] = {'\0'};
+    char number1[MAX_LENGHT], number2[MAX_LENGHT],
+        result[MAX_LENGHT] = {'\0'}, reminder[MAX_LENGHT] = {'\0'};
     int a = 12;
-    int b = 53, c = 0;
+    int b = 3, c = 0, d = 0;
 
-    char **fuck = calloc(12, sizeof(char *));
-    *++fuck = "kurwa";
-    printf("%s\n", *fuck);
-    --fuck;
-    free(fuck);
-    // dynamic table
     conversionToBinary(number1, a, MAX_LENGHT);
     conversionToBinary(number2, b, MAX_LENGHT);
 
-    binaryMultiplication(number1, number2, result, MAX_LENGHT);
-    visualieMultiplication(number1, number2, result);
-    converstionToDecimal(result, &c);
+    binaryDivsion(number1, number2, result, reminder);
+    converstionToDecimal(number1, &a);
     converstionToDecimal(number2, &b);
-    printf("\n%d * %d = %d\n", a, b, c);
+    converstionToDecimal(result, &c);
+    converstionToDecimal(reminder, &d);
+    printf("\n%d / %d = %d reminder :%d\n", a, b, c, d);
     return 0;
 }
