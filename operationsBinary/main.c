@@ -361,11 +361,11 @@ void calculateWholes(char *result, int numberOfZerosToAdd)
 }
 void binaryDivsion(char *first, char *secund, char *result, char *reminder)
 {
-    
-    //   1.Assumes that result,rest are empty i.e there is no important information on it and are starting with '\0'
+
+    //   1.Assumes that result,is whole part of divison of first by secund on it and ends with '\0'
     //   2.Assumes that first and secund are binary numbers in form of string with ending of '\0'
 
-    // if checking goes badly then we are set
+    // case where first is smaller than secund
     strcpy(reminder, first);
     if (checkIfFirstIsLarger(first, secund) < 0)
     {
@@ -392,12 +392,16 @@ void binaryDivsion(char *first, char *secund, char *result, char *reminder)
     fillWithZeros(walkerResult + 1, howManyZerosToEnd);
 }
 // Visual functions made for printing argmuent on screen
-void printNumberNspaceLater(char *number, int n)
+void printNspaces(int n)
 {
-    // 1.Assumes that first and secund, result are binary numbers in form of string with ending of '\0'
-    // 2. Assumes that secnud is larger repesents value of multiplication of first by secund
     for (int i = 0; i < n; i++)
         printf(" ");
+}
+void printNumberNspaceLater(char *number, int n)
+{
+    // 1.Assumes that number is binary number in form of string with ending of '\0'
+    // 2. Assumes that n is amount of spaces need.
+    printNspaces(n);
     printf("%s\n", number);
 }
 void drawNiceLine(int n)
@@ -405,6 +409,11 @@ void drawNiceLine(int n)
     for (int i = 0; i < n; i++)
         printf("-");
     puts("");
+}
+void printPartOfNumber(char *number, int amountOfCharactersToPrint)
+{
+    for (int i = 0; i < amountOfCharactersToPrint && *number; i++)
+        printf("%c", *number++);
 }
 
 void visualiseAddition(char *first, char *secund, char *result)
@@ -451,6 +460,54 @@ void visualieMultiplication(char *first, char *secund, char *result)
     }
     drawNiceLine(strlen(result));
     printf("%s", result);
+}
+void visualiseDivison(char *first, char *secund, char *result)
+{
+    char *reminder = (char *)calloc(MAX_LENGHT, sizeof(char));
+    if (checkIfFirstIsLarger(first, secund) < 0)
+    {
+        printNumberNspaceLater(result, strlen(first) - strlen(result));
+        drawNiceLine(strlen(first));
+        printf("%s:%s", first, secund);
+        drawNiceLine(strlen(first));
+        printf("%s", first);
+        return;
+    }
+    strcpy(reminder, first);
+
+    char *endFragmentReminder;
+    int howManyZerosToEnd = 0, howManyZerosToEndBefore = 0, howManyZeorosWhereSkipped = 0;
+    // Place for symbol is in this case for ";"
+    printNumberNspaceLater(result, strlen(first) - strlen(result));
+    drawNiceLine(strlen(first));
+    printf("%s:%s\n", first, secund);
+
+    int totalSkipped = 0;
+    int isItFirst = 1;
+    char *walekerResult = result;
+    // unfortunely I had trouble to figure out other version that didnt requrie memorisation of reminders.
+    while ((endFragmentReminder = findEndOfFragmentOfFirstLargerOrEqualToSecund(reminder, secund)) != NULL)
+    {
+        if (!isItFirst)
+        {
+            printNspaces(walekerResult - result);
+            printPartOfNumber(reminder, endFragmentReminder - reminder + PLACE_FOR_SYMBOL);
+            puts("");
+        }
+        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1);
+        printNumberNspaceLater(secund, walekerResult - result);
+        // printNspaces(walekerResult-result);
+        printNspaces(walekerResult - result);
+        drawNiceLine(endFragmentReminder - reminder + PLACE_FOR_SYMBOL);
+        walekerResult = findFirstOneFromStart(++walekerResult);
+        isItFirst = 0;
+        killUnecesseryZeors(reminder);
+    }
+    walekerResult=findFirstOneFromEnd(result,goToEndString(result))+1;
+    printNspaces(walekerResult-result);
+    printf("%s\n",reminder);
+    free(reminder);
+    reminder = NULL;
 }
 void swap(int *a, int *b)
 {
@@ -573,8 +630,9 @@ int testDivison()
 }
 int main()
 {
+    srand(time(NULL));
     char first[MAX_LENGHT], secund[MAX_LENGHT], result[MAX_LENGHT], reminder[MAX_LENGHT];
-    int a = 6602, b = 128, c = 0, d = 0;
+    int a = 805312088, b = 3017, c = 0, d = 0;
     destroyString(first);
     destroyString(secund);
     destroyString(result);
@@ -583,6 +641,7 @@ int main()
     conversionToBinary(first, a, MAX_LENGHT);
     conversionToBinary(secund, b, MAX_LENGHT);
     binaryDivsion(first, secund, result, reminder);
+    visualiseDivison(first, secund, result);
     converstionToDecimal(result, &c);
     converstionToDecimal(reminder, &d);
     printf("\n%d \\ %d =%d reminder : %d", a, b, c, d);
