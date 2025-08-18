@@ -320,7 +320,7 @@ void partialSubtraction(char *start, char *subtrahend, char *result, int numberO
     if (result != start)
         strcpy(result, start); // it is gurantee that result has the same things stored
 
-    char *partialReminder = (char *)calloc(numberOfCharactersToSubtract + 1, sizeof(char));
+    char *partialReminder = (char *)calloc(numberOfCharactersToSubtract + 2, sizeof(char));
     copyNFirstCharactersWithEnding(start, partialReminder, numberOfCharactersToSubtract);
     binarySubtraction(partialReminder, subtrahend, partialReminder);
     // part for writing in results
