@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 // for pseudo random numbers for testing
 #include <time.h>
 // Amongst of all document there is convention to use (first , secund, result) -
@@ -15,6 +14,7 @@
         free(temp);                  \
     }
 // text fucntions
+
 void destroyString(char *s)
 {
     *s = '\0';
@@ -32,6 +32,7 @@ int findBigestLenghtOfStrings(char *table[], int number)
 void copyNFirstCharactersWithEnding(char *source, char *destination, int n)
 {
     strncpy(destination, source, n);
+
     *(destination + n) = '\0';
 }
 void copyAllButNLastCharacters(char *source, char *destination, int n)
@@ -144,7 +145,7 @@ char *findFirstOneFromStart(char *start)
     else
         return NULL;
 }
-char complateLenghtOf2To1(char *number1, char *number2)
+void complateLenghtOf2To1(char *number1, char *number2)
 {
     if (strlen(number1) > strlen(number2))
     {
@@ -176,7 +177,7 @@ int checkIfFirstIsLarger(char *first, char *secund)
                 return -1;
     return 0;
 }
-#define ADDITON_FOR_AMOUNT_OF_CHARACRTERS 1
+#define FOR_CURRENT_CHARCTER 1
 char *findEndOfFragmentOfFirstLargerOrEqualToSecund(char *first, char *secund)
 {
     // Assumtions: first and secund are binary numbers represented in table of chars ended with '\0'
@@ -185,20 +186,21 @@ char *findEndOfFragmentOfFirstLargerOrEqualToSecund(char *first, char *secund)
     if (strlen(first) < strlen(secund))
         return NULL;
     char *walker1 = first;
-    while (walker1 - first + ADDITON_FOR_AMOUNT_OF_CHARACRTERS < strlen(secund) && *walker1 != '\0')
+    while (walker1 - first + FOR_CURRENT_CHARCTER < strlen(secund) && *walker1 != '\0')
         walker1++;
 
     // I belive its more intuitive while not necessery demanding for this use-case
-    char *tempTalbe = calloc(walker1 - first + 2, sizeof(char));
-    copyNFirstCharactersWithEnding(first, tempTalbe, walker1 - first + ADDITON_FOR_AMOUNT_OF_CHARACRTERS);
+    char *tempTalbe = calloc(walker1 - first + FOR_CURRENT_CHARCTER + 1, sizeof(char));
+    copyNFirstCharactersWithEnding(first, tempTalbe, walker1 - first + FOR_CURRENT_CHARCTER); // one is for '\0'
 
     if (checkIfFirstIsLarger(tempTalbe, secund) < 0 && *walker1 != '\0')
-        walker1++;
-    else if (checkIfFirstIsLarger(tempTalbe, secund) < 0)
     {
-        free(tempTalbe);
-        return NULL; // there is no fragment of first that is larger than secund.
+        walker1++;
+        walker1 = (*walker1 == '\0') ? NULL : walker1;
     }
+    else if (checkIfFirstIsLarger(tempTalbe, secund) < 0)
+        walker1 = NULL; // there is no fragment of first that is larger than secund.
+
     free(tempTalbe);
     tempTalbe = NULL;
     return walker1;
@@ -246,6 +248,7 @@ void binaryAdditionNoResultTable(char *unChanging, char *changingOne)
 
     *(changingOne + (goToEndString(result) - result + 1)) = '\0';
     free(result);
+    result = NULL;
 }
 void binaryAddition(char *first, char *secund, char *result)
 {
@@ -296,6 +299,7 @@ void binaryAdditionToPartOfSecund(char *first, char *secund, char *result, int n
     strcpy(result + numberOfCharactersToAdd, tableForNFirstCharacteres); // first n characters are allready good.
     reverse(result);
     free(tableForNFirstCharacteres);
+    tableForNFirstCharacteres = NULL;
 }
 
 void binaryMultiplication(char *first, char *secund, char *result, int max)
@@ -312,7 +316,7 @@ void binaryMultiplication(char *first, char *secund, char *result, int max)
     }
     killUnecesseryZeors(result); // sanetizing output
 }
-void partialSubtraction(char *start, char *subtrahend, char *result, int numberOfCharactersToSubtract)
+void partialSubtraction(char *start, char *subtrahend, char *result, int numberOfCharactersToSubtract, int *a)
 {
     // 1.Assumes result is intilized table i.e it has '\0' at the end
     // 2.Assumes that start is a pointer to binary numer divded by divsor- i.e what reminded of it
@@ -320,7 +324,9 @@ void partialSubtraction(char *start, char *subtrahend, char *result, int numberO
     if (result != start)
         strcpy(result, start); // it is gurantee that result has the same things stored
 
-    char *partialReminder = (char *)calloc(numberOfCharactersToSubtract + 2, sizeof(char));
+    char *partialReminder = (char *)calloc(MAX_LENGHT, sizeof(char));
+    if (!partialReminder)
+        exit(1);
     copyNFirstCharactersWithEnding(start, partialReminder, numberOfCharactersToSubtract);
     binarySubtraction(partialReminder, subtrahend, partialReminder);
     // part for writing in results
@@ -329,8 +335,10 @@ void partialSubtraction(char *start, char *subtrahend, char *result, int numberO
     reverse(result);
     char *endOfResult = goToEndString(result);
     // this is not a problem as result is copy or orginal of start
-    strcpy(endOfResult - numberOfCharactersToSubtract + 1 /*this gives location of finsh index*/, partialReminder);
-
+    if (endOfResult - numberOfCharactersToSubtract + 1 >= result)
+        strcpy(endOfResult - numberOfCharactersToSubtract + 1, partialReminder);
+    else
+        strcpy(result, partialReminder);
     reverse(result);
     killUnecesseryZeors(result);
     if (*result == '\0')
@@ -359,7 +367,7 @@ void calculateWholes(char *result, int numberOfZerosToAdd)
     *(result + numberOfZerosToAdd) = '1';
     *(result + numberOfZerosToAdd + 1) = '\0';
 }
-void binaryDivsion(char *first, char *secund, char *result, char *reminder)
+void binaryDivsion(char *first, char *secund, char *result, char *reminder, int *a)
 {
 
     //   1.Assumes that result,is whole part of divison of first by secund on it and ends with '\0'
@@ -383,7 +391,7 @@ void binaryDivsion(char *first, char *secund, char *result, char *reminder)
         howManyZerosToEnd = goToEndString(reminder) - endFragmentReminder;
         // Next line oprates on logic that we have less space to the end that we had and for that many digits we have zeros
         howManyZeorosWhereSkipped = (howManyZerosToEndBefore - howManyZerosToEnd) > 0 ? howManyZerosToEndBefore - howManyZerosToEnd - 1 : 0;
-        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1);
+        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1, a);
         calculateWholes(walkerResult, howManyZeorosWhereSkipped);
         walkerResult = goToEndString(walkerResult);
         howManyZerosToEndBefore = howManyZerosToEnd;
@@ -471,6 +479,8 @@ void visualiseDivison(char *first, char *secund, char *result)
         printf("%s:%s", first, secund);
         drawNiceLine(strlen(first));
         printf("%s", first);
+        free(reminder);
+        reminder = NULL;
         return;
     }
     strcpy(reminder, first);
@@ -482,7 +492,7 @@ void visualiseDivison(char *first, char *secund, char *result)
     drawNiceLine(strlen(first));
     printf("%s:%s\n", first, secund);
 
-    int totalSkipped = 0;
+    int lenghtOfFragment = 0;
     int isItFirst = 1;
     char *walekerResult = result;
     // unfortunely I had trouble to figure out other version that didnt requrie memorisation of reminders.
@@ -494,7 +504,7 @@ void visualiseDivison(char *first, char *secund, char *result)
             printPartOfNumber(reminder, endFragmentReminder - reminder + PLACE_FOR_SYMBOL);
             puts("");
         }
-        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1);
+        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1, &isItFirst);
         printNumberNspaceLater(secund, walekerResult - result);
         // printNspaces(walekerResult-result);
         printNspaces(walekerResult - result);
@@ -503,9 +513,9 @@ void visualiseDivison(char *first, char *secund, char *result)
         isItFirst = 0;
         killUnecesseryZeors(reminder);
     }
-    walekerResult=findFirstOneFromEnd(result,goToEndString(result))+1;
-    printNspaces(walekerResult-result);
-    printf("%s\n",reminder);
+    walekerResult = findFirstOneFromEnd(result, goToEndString(result)) + 1;
+    printNspaces(walekerResult - result);
+    printf("%s\n", reminder);
     free(reminder);
     reminder = NULL;
 }
@@ -601,6 +611,7 @@ int testMultiplication()
 }
 int testDivison()
 {
+    // Bog sie rodzi moc truchleje funkcja dziala alleuja
     char first[MAX_LENGHT], secund[MAX_LENGHT], result[MAX_LENGHT], reminder[MAX_LENGHT];
 
     int a, b, c, d;
@@ -610,13 +621,16 @@ int testDivison()
         destroyString(secund);
         destroyString(result);
         destroyString(reminder);
+
         a = (rand() % MAX_NUMBER) + 1;
         b = (rand() % MAX_NUMBER) + 1;
         if (a < b)
             swap(&a, &b);
         conversionToBinary(first, a, MAX_LENGHT);
         conversionToBinary(secund, b, MAX_LENGHT);
-        binaryDivsion(first, secund, result, reminder);
+
+        binaryDivsion(first, secund, result, reminder, &a);
+
         converstionToDecimal(result, &c);
         converstionToDecimal(reminder, &d);
         if (c != a / b || d != a % b)
@@ -631,20 +645,18 @@ int testDivison()
 int main()
 {
     srand(time(NULL));
-    char first[MAX_LENGHT], secund[MAX_LENGHT], result[MAX_LENGHT], reminder[MAX_LENGHT];
-    int a = 805312088, b = 3017, c = 0, d = 0;
-    destroyString(first);
-    destroyString(secund);
-    destroyString(result);
-    destroyString(reminder);
-
-    conversionToBinary(first, a, MAX_LENGHT);
-    conversionToBinary(secund, b, MAX_LENGHT);
-    binaryDivsion(first, secund, result, reminder);
-    visualiseDivison(first, secund, result);
+    int a = rand() % MAX_NUMBER+1, b = rand() % MAX_NUMBER+1, c, d;
+    if (a < b)
+        swap(&a, &b);
+    char number1[MAX_LENGHT], number2[MAX_LENGHT], result[MAX_LENGHT], reminder[MAX_LENGHT];
+    conversionToBinary(number1, a, MAX_LENGHT);
+    conversionToBinary(number2, b, MAX_LENGHT);
+    binaryDivsion(number1, number2, result, reminder, &c);
+    visualiseDivison(number1, number2, result);
     converstionToDecimal(result, &c);
     converstionToDecimal(reminder, &d);
-    printf("\n%d \\ %d =%d reminder : %d", a, b, c, d);
+    printf("%d / %d = %d reminder :%d\n", a, b, c, d);
+
     printf("testing infesting\n");
     if (testAddition() < 0)
         printf("fuck testAddition\n");
