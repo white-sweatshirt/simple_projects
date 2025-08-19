@@ -316,7 +316,7 @@ void binaryMultiplication(char *first, char *secund, char *result, int max)
     }
     killUnecesseryZeors(result); // sanetizing output
 }
-void partialSubtraction(char *start, char *subtrahend, char *result, int numberOfCharactersToSubtract, int *a)
+void partialSubtraction(char *start, char *subtrahend, char *result, int numberOfCharactersToSubtract)
 {
     // 1.Assumes result is intilized table i.e it has '\0' at the end
     // 2.Assumes that start is a pointer to binary numer divded by divsor- i.e what reminded of it
@@ -367,7 +367,7 @@ void calculateWholes(char *result, int numberOfZerosToAdd)
     *(result + numberOfZerosToAdd) = '1';
     *(result + numberOfZerosToAdd + 1) = '\0';
 }
-void binaryDivsion(char *first, char *secund, char *result, char *reminder, int *a)
+void binaryDivsion(char *first, char *secund, char *result, char *reminder)
 {
 
     //   1.Assumes that result,is whole part of divison of first by secund on it and ends with '\0'
@@ -391,7 +391,7 @@ void binaryDivsion(char *first, char *secund, char *result, char *reminder, int 
         howManyZerosToEnd = goToEndString(reminder) - endFragmentReminder;
         // Next line oprates on logic that we have less space to the end that we had and for that many digits we have zeros
         howManyZeorosWhereSkipped = (howManyZerosToEndBefore - howManyZerosToEnd) > 0 ? howManyZerosToEndBefore - howManyZerosToEnd - 1 : 0;
-        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1, a);
+        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1);
         calculateWholes(walkerResult, howManyZeorosWhereSkipped);
         walkerResult = goToEndString(walkerResult);
         howManyZerosToEndBefore = howManyZerosToEnd;
@@ -504,7 +504,7 @@ void visualiseDivison(char *first, char *secund, char *result)
             printPartOfNumber(reminder, endFragmentReminder - reminder + PLACE_FOR_SYMBOL);
             puts("");
         }
-        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1, &isItFirst);
+        partialSubtraction(reminder, secund, reminder, endFragmentReminder - reminder + 1);
         printNumberNspaceLater(secund, walekerResult - result);
         // printNspaces(walekerResult-result);
         printNspaces(walekerResult - result);
@@ -513,9 +513,7 @@ void visualiseDivison(char *first, char *secund, char *result)
         isItFirst = 0;
         killUnecesseryZeors(reminder);
     }
-    walekerResult = findFirstOneFromEnd(result, goToEndString(result)) + 1;
-    printNspaces(walekerResult - result);
-    printf("%s\n", reminder);
+    printNumberNspaceLater(reminder,strlen(first)-strlen(reminder));
     free(reminder);
     reminder = NULL;
 }
@@ -629,7 +627,7 @@ int testDivison()
         conversionToBinary(first, a, MAX_LENGHT);
         conversionToBinary(secund, b, MAX_LENGHT);
 
-        binaryDivsion(first, secund, result, reminder, &a);
+        binaryDivsion(first, secund, result, reminder);
 
         converstionToDecimal(result, &c);
         converstionToDecimal(reminder, &d);
@@ -642,6 +640,7 @@ int testDivison()
     }
     return 1;
 }
+
 int main()
 {
     srand(time(NULL));
@@ -651,7 +650,7 @@ int main()
     char number1[MAX_LENGHT], number2[MAX_LENGHT], result[MAX_LENGHT], reminder[MAX_LENGHT];
     conversionToBinary(number1, a, MAX_LENGHT);
     conversionToBinary(number2, b, MAX_LENGHT);
-    binaryDivsion(number1, number2, result, reminder, &c);
+    binaryDivsion(number1, number2, result, reminder);
     visualiseDivison(number1, number2, result);
     converstionToDecimal(result, &c);
     converstionToDecimal(reminder, &d);
